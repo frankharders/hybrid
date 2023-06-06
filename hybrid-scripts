@@ -1,0 +1,27 @@
+porechop conda env needed for demux the rapid barcode reads from flowcell 
+
+
+
+
+
+
+
+
+bbmap conda env needed for polish illumina reads
+
+while read SAMPLE;do 
+
+reformat.sh in=./RAWREADS/"$SAMPLE"_R#.fastq.gz out=./02_polished/"$SAMPLE".fq.gz ow;
+
+bbduk.sh in=./02_polished/"$SAMPLE".fq.gz out=./02_polished/"$SAMPLE"_trimmed.fq.gz minlen=60 ktrim=r k=21 mink=9 hdist=2 hdist2=1 ref=./adapter.fa maq=14 qtrim=r trimq=10 maxns=0 tbo tpe ow -Xmx1g ftm=5;
+
+reformat.sh in=./03_nanopore/"$SAMPLE".fastq.gz out=./03_nanopore/"$SAMPLE".header.fastq trd qin=33 ow; 
+
+
+
+done < samples.txt
+
+
+while read i;do 
+unicycler -1 ./../../../../NGS-23-BM/02_polished/$i/$i'_R1.QTR.adapter.correct.fq.gz' -2 ./../../../../NGS-23-BM/02_polished/$i/$i'_R2.QTR.adapter.correct.fq.gz' -l ./02_porechop/$i.porechop.header.fastq -o ./03_hybrid/$i;done < samples.txt
+
